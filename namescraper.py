@@ -10,17 +10,16 @@ response = requests.get(url, timeout=5)
 soup = BeautifulSoup(response.content, "html.parser")
 plantArr = []
 
-# all illnesses have h2 tags and are in class "module__title"
-# here we will fetch the illness titles
 for plants in soup.findAll('a'):
     if plants.text == "Home":
         break
-    plantObject = {
-        "name": plants.text,
-        "link": plants.get('href')
-    }
-    print(plantObject)
-    plantArr.append(plantObject)
+    elif plants.text != "Guide to Houseplants" and plants.text != "Return to top of House Plants Encyclopedia A-Z":
+        plantObject = {
+            "name": plants.text,
+            "link": plants.get('href')
+        }
+        print(plantObject)
+        plantArr.append(plantObject)
 
 with open('nameData.json', 'w') as outfile:
     json.dump(plantArr, outfile)

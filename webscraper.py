@@ -6,22 +6,52 @@ from bs4 import BeautifulSoup
 import requests
 import json
 
-url = 'https://www.guide-to-houseplants.com/house-plants-encyclopedia-a-z.html?fbclid=IwAR3lk_1IC9iYRFRWFLMYlzRV0IG2Ea00n7Ogq4p6zUV4Tu5PKsUKegQK_S0'
-response = requests.get(url, timeout=5)
-soup = BeautifulSoup(response.content, "html.parser")
-plantArr = []
+arrArr = [];
+# open json file
+light = 0
+temp = 0
+water = 0
+soil = 0
+humidity = 0
+with open('imgData.json') as json_data:
+    jsonData = json.load(json_data)
+    # print
+    #for i in jsonData:
+    #    print (i['name'])
 
-# all illnesses have h2 tags and are in class "module__title"
-# here we will fetch the illness titles
-for plants in soup.findAll('a'):
-    if plants.text == "Home":
-        break
-    plantObject = {
-        "name": plants.text,
-        "link": plants.get('href')
-    }
-    print(plantObject)
-    plantArr.append(plantObject)
+    infoArr=[]
+    for i in jsonData:
+        url = i['link'];
+        response = requests.get(url, timeout=5)
+        soup = BeautifulSoup(response.content, "html.parser")
 
-with open('scraperData.json', 'w') as outfile:
-    json.dump(plantArr, outfile)
+        for info in soup.findAll('span', {'style':"background-color: transparent;"}):
+            bval = info.find('b')
+            if bval != None:
+                if bval.text == "Light:":
+                    light = info.text
+                if bval.text == "Temperature:":
+                    temp = info.text
+                if bval.text == "Water:":
+                    water = info.text
+                if bval.text == "Humidity:":
+                    humidity = info.text
+                if bval.text == "Soil:":
+                    soil = info.text
+
+        infoObject = {
+            "name": i['name'],
+            "img": i['pic'],
+            "light": light,
+            "temp": temp,
+            "water": water,
+            "humidity": humidity,
+            "soil": soil
+        }
+
+        arrArr.append(infoObject)
+        #print(infoObject)
+        infoObject = []
+
+with open ('scraperData.json', 'w') as outfile:
+    json.dump(arrArr, outfile)
